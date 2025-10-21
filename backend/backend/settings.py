@@ -37,12 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'transactions',
-    'rules',
-    'notifications',
-    'django_prometheus',
 
+    # Внешние библиотеки
+    'rest_framework',
+
+    # Приложения
+    'apps.transactions',
+    'apps.rules',
+    'apps.fraud_detection',
+    'apps.notifications',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +58,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'fraud_detection.urls'
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
@@ -72,7 +75,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'fraud_detection.wsgi.application'
+WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # Database
