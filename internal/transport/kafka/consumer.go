@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"time"
 	"github.com/segmentio/kafka-go"
 	"github.com/sotremont/fraud_detection_service/internal/domain"
 )
@@ -36,12 +37,19 @@ func NewConsumer(brokers []string, topic, groupID string, engine interface {
 
 func (c *Consumer) Start(ctx context.Context) {
 	log.Println("Consumer started fetching...")
+	
+	// Simple retry loop to handle transient "Leader Not Available" errors during startup
 	for {
 		msg, err := c.reader.FetchMessage(ctx)
 		if err != nil {
-			log.Printf("failed to fetch message: %v", err)
-			return
+			if err == context.Canceled {
+				return
+			}
+			log.Printf("failed to fetch message, retrying in 2s: %v", err)
+			time.Sleep(2 * time.Second)
+			continue
 		}
+		
 		log.Printf("Received message: %s", string(msg.Value))
 
 		var tx domain.Transaction
