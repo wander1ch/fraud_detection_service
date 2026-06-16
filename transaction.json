@@ -1,0 +1,12 @@
+{
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "correlation_id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+    "user_id": "user_123",
+    "card_number": "4444-5555-6666-7777",
+    "amount": 15000.00,
+    "currency": "EUR",
+    "client_ip": "192.168.1.1",
+    "country": "DE",
+    "timestamp": "2026-06-16T15:00:00Z"
+}
+
