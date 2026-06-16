@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,21 +14,26 @@ import (
 	"github.com/sotremont/fraud_detection_service/internal/service"
 	"github.com/sotremont/fraud_detection_service/internal/transport/kafka"
 	"github.com/sotremont/fraud_detection_service/internal/usecase"
+	"go.uber.org/zap"
 )
 
 func main() {
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
 	// 1. DB
 	db, err := pgxpool.New(ctx, os.Getenv("DB_URL"))
 	if err != nil {
-		log.Fatalf("failed to connect to db: %v", err)
+		logger.Fatal("failed to connect to db", zap.Error(err))
 	}
 	defer db.Close()
 
 	// 2. Redis
 	rdb := goredis.NewClient(&goredis.Options{Addr: os.Getenv("REDIS_URL")})
+	defer rdb.Close()
 
 	// 3. Engine & Rules
 	engine := usecase.NewAntiFraudEngine()
@@ -52,6 +56,6 @@ func main() {
 		engine, txRepo, histRepo, notifier,
 	)
 
-	log.Println("Service started. Listening to Kafka...")
+	logger.Info("Service started. Listening to Kafka...")
 	consumer.Start(ctx)
 }
