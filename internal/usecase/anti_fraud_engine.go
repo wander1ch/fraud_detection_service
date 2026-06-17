@@ -2,10 +2,12 @@ package usecase
 
 import (
 	"context"
-	"github.com/sotremont/fraud_detection_service/internal/domain"
-	"golang.org/x/sync/errgroup"
 	"sync"
 	"time"
+
+	"github.com/sotremont/fraud_detection_service/internal/domain"
+	"github.com/sotremont/fraud_detection_service/internal/telemetry"
+	"golang.org/x/sync/errgroup"
 )
 
 type antiFraudEngine struct {
@@ -41,6 +43,10 @@ func (e *antiFraudEngine) CheckTransaction(ctx context.Context, tx *domain.Trans
 				return err
 			}
 			results[i] = res
+
+			if res.IsTriggered {
+				telemetry.RuleHits.WithLabelValues(rule.ID(), rule.Name()).Inc()
+			}
 			return nil
 		})
 	}
@@ -48,5 +54,12 @@ func (e *antiFraudEngine) CheckTransaction(ctx context.Context, tx *domain.Trans
 	if err := g.Wait(); err != nil {
 		return nil, err
 	}
+
+	for _, res := range results {
+		if res.IsFraud {
+			telemetry.FraudAlerts.Inc()
+		}
+	}
+
 	return results, nil
 }

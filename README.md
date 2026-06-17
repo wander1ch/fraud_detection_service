@@ -8,6 +8,7 @@
 - **База данных:** PostgreSQL (для истории транзакций и хранения)
 - **Кэширование:** Redis (для быстрого доступа к состоянию/истории)
 - **Трассировка:** OpenTelemetry + Jaeger
+- **Мониторинг:** Prometheus + Grafana
 - **Логирование:** zap
 - **Конфигурация:** Переменные окружения (`.env`)
 
@@ -17,6 +18,7 @@
 - Автоматические уведомления через вебхуки для помеченных транзакций.
 - Корректная обработка завершения работы (Graceful Shutdown).
 - Структурированное логирование (zap).
+- Сбор метрик (RPS, Latency, Fraud Rate, Rule Hits).
 
 ## Начало работы
 
@@ -48,7 +50,6 @@ make logs
 ```bash
 docker logs -f deploy-mock-webhook-1
 ```
-После отправки транзакции в Kafka вы увидите в этих логах **POST**-запрос с телом алерта.
 
 ### 3. Трассировка (OpenTelemetry + Jaeger)
 Сервис инструментирован для сбора распределенных трасс.
@@ -56,7 +57,14 @@ docker logs -f deploy-mock-webhook-1
 2. Откройте интерфейс Jaeger по адресу `http://localhost:16686`.
 3. В выпадающем списке "Service" выберите `fraud_detection_service` и нажмите "Find Traces".
 
-### 4. Тестирование входящих данных Kafka
+### 4. Мониторинг метрик (Prometheus)
+Сервис отдает метрики в формате Prometheus на порту `9090` (внутри контейнера).
+1. Откройте интерфейс Prometheus по адресу `http://localhost:9090`.
+2. Перейдите во вкладку **Status -> Targets**. Убедитесь, что `fraud_detector` имеет статус **UP**.
+3. Во вкладке **Graph** введите запрос `fraud_detector_transactions_total` и нажмите **Execute**. 
+*Примечание: Если данные не отображаются, отправьте тестовую транзакцию через Kafka, подождите 5-10 секунд и повторите запрос.*
+
+### 5. Тестирование входящих данных Kafka
 Отправьте тестовое JSON-сообщение в Kafka-топик `transactions`:
 ```bash
 echo '{"id": "test-123", "amount": 15000, "currency": "EUR"}' | docker exec -i deploy-kafka-1 kafka-console-producer.sh --bootstrap-server localhost:9092 --topic transactions

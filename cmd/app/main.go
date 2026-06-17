@@ -15,6 +15,8 @@ import (
 	"github.com/sotremont/fraud_detection_service/internal/transport/kafka"
 	"github.com/sotremont/fraud_detection_service/internal/usecase"
 	"go.uber.org/zap"
+	"net/http"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -23,6 +25,15 @@ func main() {
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
+
+	// Metrics
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		logger.Info("Starting metrics server on :9090")
+		if err := http.ListenAndServe(":9090", nil); err != nil {
+			logger.Error("metrics server failed", zap.Error(err))
+		}
+	}()
 
 	// 1. DB
 	db, err := pgxpool.New(ctx, os.Getenv("DB_URL"))
