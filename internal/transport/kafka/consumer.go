@@ -75,8 +75,11 @@ func (c *Consumer) Start(ctx context.Context) {
 		// Notify
 		for _, res := range results {
 			if res.IsFraud {
-				_ = c.notifier.Send(ctx, domain.Alert{TransactionID: tx.ID, CorrelationID: tx.CorrelationID})
-				log.Printf("Alert sent for transaction: %s", tx.ID)
+				if err := c.notifier.Send(ctx, domain.Alert{TransactionID: tx.ID, CorrelationID: tx.CorrelationID}); err != nil {
+					log.Printf("failed to send alert for transaction %s: %v", tx.ID, err)
+				} else {
+					log.Printf("Alert sent successfully for transaction: %s", tx.ID)
+				}
 			}
 		}
 

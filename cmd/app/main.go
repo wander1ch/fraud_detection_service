@@ -45,7 +45,7 @@ func main() {
 	// Repos
 	txRepo := postgres.NewTransactionRepository(db)
 	histRepo := redisrepo.NewHistoryRepository(rdb)
-	notifier := service.NewWebhookNotifier("https://webhook.site/cd4c65cd-36bd-48ff-a25c-83d32e4b3c9f")
+	notifier := service.NewWebhookNotifier("http://mock-webhook:8080")
 
 	// 4. Kafka Consumer
 	brokers := []string{os.Getenv("KAFKA_BROKERS")}

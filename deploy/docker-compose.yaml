@@ -72,3 +72,8 @@ services:
     image: jaegertracing/all-in-one
     ports:
       - "16686:16686"
+
+  mock-webhook:
+    image: mendhak/http-https-echo
+    ports:
+      - "8080:8080"

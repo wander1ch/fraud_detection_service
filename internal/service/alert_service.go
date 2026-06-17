@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"github.com/sotremont/fraud_detection_service/internal/domain"
 )
@@ -21,6 +22,7 @@ func (n *webhookNotifier) Send(ctx context.Context, alert domain.Alert) error {
 	if err != nil {
 		return err
 	}
+	log.Printf("Sending webhook to %s, body: %s", n.url, string(data)) // Добавлено логирование
 	req, err := http.NewRequestWithContext(ctx, "POST", n.url, bytes.NewBuffer(data))
 	if err != nil {
 		return err
@@ -31,5 +33,6 @@ func (n *webhookNotifier) Send(ctx context.Context, alert domain.Alert) error {
 		return err
 	}
 	defer resp.Body.Close()
+	log.Printf("Webhook response status: %d", resp.StatusCode)
 	return nil
 }
