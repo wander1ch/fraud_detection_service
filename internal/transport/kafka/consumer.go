@@ -45,8 +45,8 @@ func (c *Consumer) Start(ctx context.Context) {
 			if err == context.Canceled {
 				return
 			}
-			log.Printf("failed to fetch message, retrying in 2s: %v", err)
-			time.Sleep(2 * time.Second)
+			log.Printf("failed to fetch message, retrying in 10s: %v", err)
+			time.Sleep(10 * time.Second)
 			continue
 		}
 		
